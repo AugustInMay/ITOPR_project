@@ -3,6 +3,7 @@ import pylab
 import saver
 import adapter
 import os
+import numpy as np
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 

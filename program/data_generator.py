@@ -2,6 +2,7 @@ import random
 from phi.torch.flow import *
 import pylab
 import saver
+from pathlib import Path
 
 
 def step(velocity, smoke, pressure, dt=1.0, buoyancy_factor=1.0, INFLOW = None):
@@ -109,4 +110,60 @@ def save_noised_data(plot=False):
         saver.save_np_f(lst[i], names[i])
 
 
-save_generated_data_for_test(False)
+def refractor_data():
+    Path("./data").mkdir(parents=True, exist_ok=True)
+    Path("./pics").mkdir(parents=True, exist_ok=True)
+
+    for i in range(1,5):
+        for j in range(100):
+            smoke = saver.read_tensor_f("smoke" + str(i) + "_" + str(j))
+            pres = saver.read_tensor_f("pressure" + str(i) + "_" + str(j))
+            vel = saver.read_tensor_f("vel" + str(i) + "_" + str(j))
+
+            pressure = CenteredGrid(pres, extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100])
+            smoke = CenteredGrid(smoke, extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100])
+            velocity = StaggeredGrid(vel, extrapolation.ZERO, x=100, y=100, bounds=Box[0:100, 0:100])
+
+            vel_x = velocity.values.vector[0].numpy('y,x')
+            vel_y = velocity.values.vector[1].numpy('y,x')
+
+            vel_x = np.transpose(vel_x)
+            vel_x = np.append(vel_x, [vel_x[-1]], axis=0)
+            vel_x = np.transpose(vel_x)
+            vel_y = np.append(vel_y, [vel_y[-1]], axis=0)
+            
+            saver.save_np_f(pressure.values.numpy('y,x'), "./data/" + "pressure" + str(i) + "_" + str(j))
+            saver.save_np_f(smoke.values.numpy('y,x'), "./data/" + "smoke" + str(i) + "_" + str(j))
+            saver.save_np_f(vel_x, "./data/" + "vel_x" + str(i) + "_" + str(j))
+            saver.save_np_f(vel_y, "./data/" + "vel_y" + str(i) + "_" + str(j))
+
+            saver.save_np_scaled_img(pressure.values.numpy('y,x'), "./pics/" + "pressure" + str(i) + "_" + str(j))
+            saver.save_np_scaled_img(smoke.values.numpy('y,x'), "./pics/" + "smoke" + str(i) + "_" + str(j))
+            saver.save_np_scaled_img(vel_x, "./pics/" + "vel_x" + str(i) + "_" + str(j))
+            saver.save_np_scaled_img(vel_y, "./pics/" + "vel_y" + str(i) + "_" + str(j))
+
+            for k in range(5):
+                velocity, smoke, pressure = step(velocity, smoke, pressure)
+
+            vel_x = velocity.values.vector[0].numpy('y,x')
+            vel_y = velocity.values.vector[1].numpy('y,x')
+
+            vel_x = np.transpose(vel_x)
+            vel_x = np.append(vel_x, [vel_x[-1]], axis=0)
+            vel_x = np.transpose(vel_x)
+            vel_y = np.append(vel_y, [vel_y[-1]], axis=0)
+            
+            saver.save_np_f(pressure.values.numpy('y,x'), "./data/" + "pressure_target" + str(i) + "_" + str(j))
+            saver.save_np_f(smoke.values.numpy('y,x'), "./data/" + "smoke_target" + str(i) + "_" + str(j))
+            saver.save_np_f(vel_x, "./data/" + "vel_x_target" + str(i) + "_" + str(j))
+            saver.save_np_f(vel_y, "./data/" + "vel_y_target" + str(i) + "_" + str(j))
+
+            saver.save_np_scaled_img(pressure.values.numpy('y,x'), "./pics/" + "pressure_target" + str(i) + "_" + str(j))
+            saver.save_np_scaled_img(smoke.values.numpy('y,x'), "./pics/" + "smoke_target" + str(i) + "_" + str(j))
+            saver.save_np_scaled_img(vel_x, "./pics/" + "vel_x_target" + str(i) + "_" + str(j))
+            saver.save_np_scaled_img(vel_y, "./pics/" + "vel_y_target" + str(i) + "_" + str(j))
+
+            pylab.close('all')
+
+
+refractor_data()

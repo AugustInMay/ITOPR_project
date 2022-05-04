@@ -1,5 +1,6 @@
 import pylab
 import RDA
+import numpy as np
 
 def ret_nan_coors(np_arr):
     points = list()
