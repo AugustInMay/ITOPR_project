@@ -4,6 +4,7 @@ import pickle
 
 def save_np_img(data, name:str):
     pylab.imsave(name + ".png", data, origin='lower', cmap='magma')
+    pylab.close('all')
 
 def scale_data(data):
     new_data = np.zeros(np.array(data.shape)*10)
@@ -21,6 +22,8 @@ def plot_grid_val(grid, name:str):
     fig = phi.vis.plot(grid, cmap='magma')
     fig.set_size_inches(12, 10)
     fig.savefig(name + ".png", dpi=100)
+    pylab.close(fig)
+    
 
 def save_tensor_f(data, name:str):
     with open(name + '.pickle', 'wb') as handle:

@@ -19,13 +19,13 @@ def step(velocity, smoke, pressure, dt=1.0, buoyancy_factor=1.0, INFLOW = None):
     velocity, pressure = fluid.make_incompressible(velocity)
     return velocity, smoke, pressure
 
-def multi_step(t, INFLOW = None):
+def multi_step(t, bf, INFLOW = None):
     pressure = None
     smoke = CenteredGrid(0, extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100])
     velocity = StaggeredGrid(0, extrapolation.ZERO, x=100, y=100, bounds=Box[0:100, 0:100])
 
     for i in range(t):
-        velocity, smoke, pressure = step(velocity, smoke, pressure, INFLOW=INFLOW)
+        velocity, smoke, pressure = step(velocity, smoke, pressure, buoyancy_factor=bf, INFLOW=INFLOW)
 
     return velocity, smoke, pressure
 
@@ -56,37 +56,67 @@ def grid_to_val(velocity, smoke, pressure):
     return velocity.values.vector[0], velocity.values.vector[1], smoke.values, pressure.values
 
 def grid_to_np(velocity, smoke, pressure):
-    return velocity.values.vector[0].numpy('y,x'), velocity.values.vector[1].numpy('y,x'), smoke.values.numpy('y,x'), pressure.values.numpy('y,x')
+    return [velocity.values.vector[0].numpy('y,x'), velocity.values.vector[1].numpy('y,x'), smoke.values.numpy('y,x'), pressure.values.numpy('y,x')]
 
 
-def generate_data(plot = False):
+def generate_data(plot = False, specific_name = ''):
     t = random.randint(50, 100)
-    INFLOW_ = CenteredGrid(Sphere(center=(random.randint(10, 90), random.randint(10, 40)), radius=random.randint(5, 10)), extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100]) * 0.6
-
-    velocity, smoke, pressure = multi_step(t, INFLOW_)
+    INFLOW_ = CenteredGrid(Sphere(center=(random.randint(10, 90), random.randint(10, 40)), radius=random.randint(5, 10)), extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100]) * round(random.uniform(0.2,1.5), 2)
+    b_f = round(random.uniform(1,2), 2)
+    velocity, smoke, pressure = multi_step(t, b_f, INFLOW_)
 
     if plot:
+        Path("../pics/").mkdir(parents=True, exist_ok=True)
         vals = grid_to_val(velocity, smoke, pressure)
         names = ["vel_x", "vel_y", "smoke", 'pressure']
         for i in range(4):
-            saver.plot_grid_val(vals[i], names[i])
+            saver.plot_grid_val(vals[i], "../pics/"+names[i] + specific_name)
+
+        del vals
 
     return velocity, smoke, pressure
 
-def save_generated_data_for_train(plot=False):
-    lst = generate_data(plot)
+def save_generated_data_for_train(plot=False, specific_name = ''):
+    Path("../data/train").mkdir(parents=True, exist_ok=True)
+    lst = generate_data(plot, specific_name)
     names = ["vel", "smoke", 'pressure']
 
     for i in range(3):
-        saver.save_tensor_f(lst[i].values, names[i])
+        saver.save_tensor_f(lst[i].values, '../data/train' + names[i] + specific_name)
+
+    del lst
     
-def save_generated_data_for_test(plot=False):
-    velocity, smoke, pressure = generate_data(plot)
+def save_generated_data_for_test(plot=False, specifin_name=''):
+    Path("../data/test/").mkdir(parents=True, exist_ok=True)
+    velocity, smoke, pressure = generate_data(plot, specific_name=specifin_name)
+
+    lst = grid_to_np(velocity, smoke, pressure)
+    names = ["vel_x", "vel_y", "smoke", 'pressure']
+    
+    lst[0] = np.transpose(lst[0])
+    lst[0] = np.append(lst[0], [lst[0][-1]], axis=0)
+    lst[0] = np.transpose(lst[0])
+    lst[1] = np.append(lst[1], [lst[1][-1]], axis=0)
+
+    for i in range(4):
+        saver.save_np_f(lst[i], "../data/test/" + names[i] + specifin_name)
+
+    for i in range(5):
+        velocity, smoke, pressure = step(velocity, smoke, pressure)
+
     lst = grid_to_np(velocity, smoke, pressure)
     names = ["vel_x", "vel_y", "smoke", 'pressure']
 
+    lst[0] = np.transpose(lst[0])
+    lst[0] = np.append(lst[0], [lst[0][-1]], axis=0)
+    lst[0] = np.transpose(lst[0])
+    lst[1] = np.append(lst[1], [lst[1][-1]], axis=0)
+
     for i in range(4):
-        saver.save_np_f(lst[i], names[i])
+        saver.save_np_f(lst[i], "../data/test/" + names[i] + "_target" + specifin_name)
+        saver.save_np_scaled_img(lst[i], "../pics/" + names[i] + "_target" + specifin_name)
+
+    pylab.close('all')
 
 def generate_noised_data(plot = False):
     velocity, smoke, pressure = generate_data(plot)
@@ -98,7 +128,7 @@ def generate_noised_data(plot = False):
     if plot:
         names = ["vel_x", "vel_y", "smoke", 'pressure']
         for i in range(4):
-            saver.save_np_scaled_img(np.where(np.isnan(lst[i]), 0, lst[i]), names[i] + "_noise")
+            saver.save_np_scaled_img(np.where(np.isnan(lst[i]), 0, lst[i]), '../data/test' + names[i] + "_noise")
 
     return lst
 
@@ -166,4 +196,6 @@ def refractor_data():
             pylab.close('all')
 
 
-refractor_data()
+for i in range(89, 100):
+    save_generated_data_for_test(True, '5_' + str(i))
+
