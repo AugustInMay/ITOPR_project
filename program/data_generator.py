@@ -194,5 +194,5 @@ def refractor_data():
 
 
 refractor_data()
-for i in range(50, 100):
+for i in range(53, 100):
     save_generated_data_for_test(plot = True, specifin_name="5_" + str(i))
