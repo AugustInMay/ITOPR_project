@@ -5,6 +5,11 @@ import adapter
 import os
 import numpy as np
 
+import torch
+import torch.nn as nn
+from torch.autograd import Variable
+from DfpNet import UNet_, weights_init
+
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 def choice():
@@ -76,9 +81,24 @@ if __name__ == '__main__':
             if nan_val != 0:
                 print(str(nan_val) + " noise points were discovered, cannot proceed")
             else:
+                inputs = torch.FloatTensor(1, 4, 100, 100)
+                inputs = Variable(inputs)
+                
                 for i in range(4):
-                    saver.save_np_f(fields[i], files_n[i] + "_next")
-                    saver.save_np_scaled_img(fields[i], files_n[i] + "_next")
+                    inputs[0][i] = torch.from_numpy(fields[i])
+
+                netG = UNet_(channelExponent=5)
+                modelFn = "./" + "modelG"
+                netG.load_state_dict( torch.load(modelFn, map_location=torch.device('cpu')) )
+
+                netG.eval()
+
+                outputs = netG(inputs)
+                outputs_cpu = outputs.data.cpu().numpy()[0]
+
+                for i in range(4):
+                    saver.save_np_f(outputs_cpu[i], files_n[i] + "_next")
+                    saver.save_np_scaled_img(outputs_cpu[i], files_n[i] + "_next")
 
         ch = choice()
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
