@@ -77,8 +77,8 @@ def generate_data(plot = False, specific_name = ''):
     return velocity, smoke, pressure
 
 def generate_simple_data(plot = False, specific_name = ''):
-    t = random.randint(30, 100)
-    INFLOW_ = CenteredGrid(Sphere(center=(random.randint(10, 90), random.randint(10, 40)), radius=random.randint(2, 10)), extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100]) * 0.2
+    t = random.randint(25, 100)
+    INFLOW_ = CenteredGrid(Sphere(center=(random.randint(10, 90), random.randint(10, 40)), radius=random.randint(2, 10)), extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100]) * 0.5
     velocity, smoke, pressure = multi_step(t, 1, INFLOW_)
 
     if plot:
