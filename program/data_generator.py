@@ -78,7 +78,7 @@ def generate_data(plot = False, specific_name = ''):
 
 def generate_simple_data(plot = False, specific_name = ''):
     t = random.randint(25, 100)
-    INFLOW_ = CenteredGrid(Sphere(center=(random.randint(10, 90), random.randint(10, 40)), radius=random.randint(2, 10)), extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100]) * 0.5
+    INFLOW_ = CenteredGrid(Sphere(center=(random.randint(10, 90), random.randint(10, 40)), radius=random.randint(3, 10)), extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100]) * 0.5
     velocity, smoke, pressure = multi_step(t, 1, INFLOW_)
 
     if plot:
@@ -90,11 +90,11 @@ def generate_simple_data(plot = False, specific_name = ''):
 
         del vals
     
-    velocity_2, smoke_2, pressure_2 = multi_step(1, 1, INFLOW_)
+    velocity_2, smoke_2, pressure_2 = step(velocity, smoke, pressure, buoyancy_factor=1, INFLOW=INFLOW_)
 
     if plot:
         Path("../pics_2/").mkdir(parents=True, exist_ok=True)
-        vals = grid_to_val(velocity, smoke, pressure)
+        vals = grid_to_val(velocity_2, smoke_2, pressure_2)
         names = ["vel_x", "vel_y", "smoke", 'pressure']
         for i in range(4):
             saver.plot_grid_val(vals[i], "../pics_2/"+names[i] + specific_name + "_target")
