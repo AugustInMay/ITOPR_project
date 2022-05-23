@@ -49,14 +49,14 @@ class UNet_(nn.Module):
         self.layer1.add_module('layer1_conv', nn.Conv2d(4, channels, 4, 2, 1, bias=True))
 
         self.layer2 = blockUNet(channels  , channels*2, 'layer2', transposed=False, bn=True, relu=False, dropout=dropout )
-        self.layer2b= blockUNet(channels*2, channels*2, 'layer2b',transposed=False, bn=True, relu=False, dropout=dropout, size=3, str_=5)
-        self.layer3 = blockUNet(channels*2, channels*4, 'layer3', transposed=False, bn=True, relu=False, dropout=dropout, size=5, str_=5)
+        self.layer2b= blockUNet(channels*2, channels*4, 'layer2b',transposed=False, bn=True, relu=False, dropout=dropout, size=3, str_=5)
+        self.layer3 = blockUNet(channels*4, channels*8, 'layer3', transposed=False, bn=True, relu=False, dropout=dropout, size=5, str_=5)
         # note the following layer also had a kernel size of 2 in the original version (cf https://arxiv.org/abs/1810.08217)
         # it is now changed to size 4 for encoder/decoder symmetry; to reproduce the old/original results, please change it to 2
      
         # note, kernel size is internally reduced by one now
-        self.dlayer3 = blockUNet(channels*4, channels*2, 'dlayer3', transposed=True, bn=True, relu=True, dropout=dropout, sf = 5)
-        self.dlayer2b= blockUNet(channels*4, channels*2, 'dlayer2b',transposed=True, bn=True, relu=True, dropout=dropout, sf = 5)
+        self.dlayer3 = blockUNet(channels*8, channels*4, 'dlayer3', transposed=True, bn=True, relu=True, dropout=dropout, sf = 5)
+        self.dlayer2b= blockUNet(channels*8, channels*2, 'dlayer2b',transposed=True, bn=True, relu=True, dropout=dropout, sf = 5)
         self.dlayer2 = blockUNet(channels*4, channels  , 'dlayer2', transposed=True, bn=True, relu=True, dropout=dropout)
 
         self.dlayer1 = nn.Sequential()
@@ -65,6 +65,7 @@ class UNet_(nn.Module):
 
     def forward(self, x):
         out1 = self.layer1(x)
+
         out2 = self.layer2(out1)
         out2b= self.layer2b(out2)
         out3 = self.layer3(out2b)

@@ -72,7 +72,7 @@ print("Validation batches: {}".format(len(valiLoader)))
 # setup training
 epochs = int(iterations/len(trainLoader) + 0.5)
 netG = UNet_(channelExponent=expo, dropout=dropout)
-#print(netG) # print full net
+print(netG) # print full net
 model_parameters = filter(lambda p: p.requires_grad, netG.parameters())
 params = sum([np.prod(p.size()) for p in model_parameters])
 print("Initialized TurbNet with {} trainable params ".format(params))

@@ -73,7 +73,9 @@ if __name__ == '__main__':
             print(str(nan_val) + " noise points were discovered")
 
             for i in range(4):
+                orig = saver.read_np_f(files_n[i][:-6])
                 adapter.count_p(fields[i])
+                print(np.sum(np.abs(orig - fields[i]))/np.sum(np.abs(fields[i])))
                 saver.save_np_f(fields[i], files_n[i] + "_app")
                 saver.save_np_scaled_img(fields[i], files_n[i] + "_app")
 

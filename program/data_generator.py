@@ -76,6 +76,60 @@ def generate_data(plot = False, specific_name = ''):
 
     return velocity, smoke, pressure
 
+def generate_simple_data(plot = False, specific_name = ''):
+    t = random.randint(30, 100)
+    INFLOW_ = CenteredGrid(Sphere(center=(random.randint(10, 90), random.randint(10, 40)), radius=random.randint(2, 10)), extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100]) * 0.2
+    velocity, smoke, pressure = multi_step(t, 1, INFLOW_)
+
+    if plot:
+        Path("../pics_2/").mkdir(parents=True, exist_ok=True)
+        vals = grid_to_val(velocity, smoke, pressure)
+        names = ["vel_x", "vel_y", "smoke", 'pressure']
+        for i in range(4):
+            saver.plot_grid_val(vals[i], "../pics_2/"+names[i] + specific_name)
+
+        del vals
+    
+    velocity_2, smoke_2, pressure_2 = multi_step(1, 1, INFLOW_)
+
+    if plot:
+        Path("../pics_2/").mkdir(parents=True, exist_ok=True)
+        vals = grid_to_val(velocity, smoke, pressure)
+        names = ["vel_x", "vel_y", "smoke", 'pressure']
+        for i in range(4):
+            saver.plot_grid_val(vals[i], "../pics_2/"+names[i] + specific_name + "_target")
+
+        del vals
+
+    return velocity, smoke, pressure, velocity_2, smoke_2, pressure_2
+
+def save_simple_data(plot=False, specific_name = ''):
+    Path("../data_2/train").mkdir(parents=True, exist_ok=True)
+    generated_data = generate_simple_data(plot, specific_name)
+    lst_inp = generated_data[:3]
+    lst_targ = generated_data[3:]
+
+    lst_inp_np = grid_to_np(lst_inp[0], lst_inp[1], lst_inp[2])
+    lst_targ_np = grid_to_np(lst_targ[0], lst_targ[1], lst_targ[2])
+    names = ["vel_x", "vel_y", "smoke", 'pressure']
+    
+    lst_inp_np[0] = np.transpose(lst_inp_np[0])
+    lst_inp_np[0] = np.append(lst_inp_np[0], [lst_inp_np[0][-1]], axis=0)
+    lst_inp_np[0] = np.transpose(lst_inp_np[0])
+    lst_inp_np[1] = np.append(lst_inp_np[1], [lst_inp_np[1][-1]], axis=0)
+
+    lst_targ_np[0] = np.transpose(lst_targ_np[0])
+    lst_targ_np[0] = np.append(lst_targ_np[0], [lst_targ_np[0][-1]], axis=0)
+    lst_targ_np[0] = np.transpose(lst_targ_np[0])
+    lst_targ_np[1] = np.append(lst_targ_np[1], [lst_targ_np[1][-1]], axis=0)
+
+    for i in range(4):
+        saver.save_np_f(lst_inp_np[i], "../data_2/train/" + names[i] + specific_name)
+        saver.save_np_f(lst_targ_np[i], "../data_2/train/" + names[i] + specific_name + "_target")
+
+    del lst_inp
+    del lst_targ_np
+
 def save_generated_data_for_train(plot=False, specific_name = ''):
     Path("../data/train").mkdir(parents=True, exist_ok=True)
     lst = generate_data(plot, specific_name)
@@ -121,14 +175,38 @@ def save_generated_data_for_test(plot=False, specifin_name=''):
 def generate_noised_data(plot = False):
     velocity, smoke, pressure = generate_data(plot)
     lst = grid_to_np(velocity, smoke, pressure)
+    lst[0] = np.transpose(lst[0])
+    lst[0] = np.append(lst[0], [lst[0][-1]], axis=0)
+    lst[0] = np.transpose(lst[0])
+    lst[1] = np.append(lst[1], [lst[1][-1]], axis=0)
+
+    names = ["vel_x", "vel_y", "smoke", 'pressure']
+
+    for i in range(4):
+        saver.save_np_f(lst[i], names[i])
+        if plot:
+            saver.save_np_scaled_img(np.where(np.isnan(lst[i]), 0, lst[i]), names[i])
     
+    for i in range(2):
+        velocity, smoke, pressure = step(velocity, smoke, pressure)
+
+    lst2 = grid_to_np(velocity, smoke, pressure)
+    lst2[0] = np.transpose(lst[0])
+    lst2[0] = np.append(lst[0], [lst[0][-1]], axis=0)
+    lst2[0] = np.transpose(lst[0])
+    lst2[1] = np.append(lst[1], [lst[1][-1]], axis=0)
+    
+    for i in range(4):
+        saver.save_np_f(lst2[i], names[i]+"_target")
+        if plot:
+            saver.save_np_scaled_img(np.where(np.isnan(lst2[i]), 0, lst2[i]), names[i]+"_target")
+
     for el in lst:
         el = scatter_noise(el)
     
     if plot:
-        names = ["vel_x", "vel_y", "smoke", 'pressure']
         for i in range(4):
-            saver.save_np_scaled_img(np.where(np.isnan(lst[i]), 0, lst[i]), '../data/test' + names[i] + "_noise")
+            saver.save_np_scaled_img(np.where(np.isnan(lst[i]), 0, lst[i]), names[i] + "_noise")
 
     return lst
 
@@ -193,6 +271,7 @@ def refractor_data():
             pylab.close('all')
 
 
-refractor_data()
-for i in range(53, 100):
-    save_generated_data_for_test(plot = True, specifin_name="5_" + str(i))
+print("Enter your number: ")
+num = str(input())
+for i in range(100):
+    save_simple_data(True, str(num) + "_" + str(i))
