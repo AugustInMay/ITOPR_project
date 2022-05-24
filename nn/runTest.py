@@ -19,7 +19,7 @@ if len(sys.argv)>1:
     print("Output prefix: {}".format(prefix))
 
 expo = 5
-dataset = TurbDataset(mode=TurbDataset.TEST, dataDirTest="../data/test/")
+dataset = TurbDataset(mode=TurbDataset.TEST, dataDirTest="../data_2/test/")
 testLoader = DataLoader(dataset, batch_size=1, shuffle=False)
 
 targets = torch.FloatTensor(1, 4, 100, 100)
