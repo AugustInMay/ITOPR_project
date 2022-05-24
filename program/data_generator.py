@@ -104,7 +104,7 @@ def generate_simple_data(plot = False, specific_name = ''):
     return velocity, smoke, pressure, velocity_2, smoke_2, pressure_2
 
 def save_simple_data(plot=False, specific_name = ''):
-    Path("../data_2/train").mkdir(parents=True, exist_ok=True)
+    Path("../data_2/test").mkdir(parents=True, exist_ok=True)
     generated_data = generate_simple_data(plot, specific_name)
     lst_inp = generated_data[:3]
     lst_targ = generated_data[3:]
@@ -124,8 +124,8 @@ def save_simple_data(plot=False, specific_name = ''):
     lst_targ_np[1] = np.append(lst_targ_np[1], [lst_targ_np[1][-1]], axis=0)
 
     for i in range(4):
-        saver.save_np_f(lst_inp_np[i], "../data_2/train/" + names[i] + specific_name)
-        saver.save_np_f(lst_targ_np[i], "../data_2/train/" + names[i] + specific_name + "_target")
+        saver.save_np_f(lst_inp_np[i], "../data_2/test/" + names[i] + specific_name)
+        saver.save_np_f(lst_targ_np[i], "../data_2/test/" + names[i] + specific_name + "_target")
 
     del lst_inp
     del lst_targ_np
@@ -273,5 +273,5 @@ def refractor_data():
 
 print("Enter your number: ")
 num = str(input())
-for i in range(100):
+for i in range(87, 100):
     save_simple_data(True, str(num) + "_" + str(i))

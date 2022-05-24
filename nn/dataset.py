@@ -1,11 +1,3 @@
-################
-#
-# Deep Flow Prediction - N. Thuerey, K. Weissenov, H. Mehrotra, N. Mainali, L. Prantl, X. Hu (TUM)
-#
-# Dataset handling
-#
-################
-
 from torch.utils.data import Dataset
 import numpy as np
 from os import listdir
@@ -58,10 +50,10 @@ def LoaderNormalizer(data, isTest = False, shuffle = 0):
             pres = np.load(data.dataDir + "pressure" + str(i)+ "_" + str(j) + ".npy")
             data.inputs[count] = np.array([sm, vel_x, vel_y, pres])
 
-            sm = np.load(data.dataDir + "smoke_target" + str(i)+ "_" + str(j) + ".npy")
-            vel_x = np.load(data.dataDir + "vel_x_target" + str(i)+ "_" + str(j) + ".npy")
-            vel_y = np.load(data.dataDir + "vel_y_target" + str(i)+ "_" + str(j) + ".npy")
-            pres = np.load(data.dataDir + "pressure_target" + str(i)+ "_" + str(j) + ".npy")
+            sm = np.load(data.dataDir + "smoke" + str(i)+ "_" + str(j) + "_target.npy")
+            vel_x = np.load(data.dataDir + "vel_x" + str(i)+ "_" + str(j) + "_target.npy")
+            vel_y = np.load(data.dataDir + "vel_y" + str(i)+ "_" + str(j) + "._target.npy")
+            pres = np.load(data.dataDir + "pressure" + str(i)+ "_" + str(j) + "_target.npy")
             data.targets[count] = np.array([sm, vel_x, vel_y, pres])
 
             count += 1
@@ -83,10 +75,10 @@ def LoaderNormalizer(data, isTest = False, shuffle = 0):
                 pres = np.load(data.dataDirTest + "pressure" + str(i)+ "_" + str(j) + ".npy")
                 data.inputs[count] = np.array([sm, vel_x, vel_y, pres])
 
-                sm = np.load(data.dataDirTest + "smoke_target" + str(i)+ "_" + str(j) + ".npy")
-                vel_x = np.load(data.dataDirTest + "vel_x_target" + str(i)+ "_" + str(j) + ".npy")
-                vel_y = np.load(data.dataDirTest + "vel_y_target" + str(i)+ "_" + str(j) + ".npy")
-                pres = np.load(data.dataDirTest + "pressure_target" + str(i)+ "_" + str(j) + ".npy")
+                sm = np.load(data.dataDirTest + "smoke" + str(i)+ "_" + str(j) + "_target.npy")
+                vel_x = np.load(data.dataDirTest + "vel_x" + str(i)+ "_" + str(j) + "_target.npy")
+                vel_y = np.load(data.dataDirTest + "vel_y" + str(i)+ "_" + str(j) + "_target.npy")
+                pres = np.load(data.dataDirTest + "pressure" + str(i)+ "_" + str(j) + "_target.npy")
                 data.targets[count] = np.array([sm, vel_x, vel_y, pres])
 
                 count += 1
@@ -106,7 +98,7 @@ class TurbDataset(Dataset):
     TRAIN = 0
     TEST  = 2
 
-    def __init__(self, mode=TRAIN, dataDir="../data/train/", dataDirTest="../data/test/", normMode=0):
+    def __init__(self, mode=TRAIN, dataDir="../data_2/train/", dataDirTest="../data_2/test/", normMode=0):
         global makeDimLess, removePOffset
         """
         :param dataProp: for split&mix from multiple dirs, see LoaderNormalizer; None means off

@@ -65,6 +65,11 @@ if __name__ == '__main__':
         nan_val = 0
 
         for el in files_n:
+            if not os.path.isfile(el + ".npy"):
+                print("'" + el + ".npy' file doesn't exist! Please check your filename again:")
+                ch = 4
+                break
+
             fields.append(saver.read_np_f(el))
             nan_val += np.count_nonzero(np.isnan(fields[-1]))
 

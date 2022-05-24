@@ -1,11 +1,3 @@
-################
-#
-# Deep Flow Prediction - N. Thuerey, K. Weissenov, H. Mehrotra, N. Mainali, L. Prantl, X. Hu (TUM)
-#
-# Main training script
-#
-################
-
 import os, sys, random
 import numpy as np
 import torch
@@ -32,7 +24,6 @@ decayLr = True
 expo = 5
 # data set config
 prop=None # by default, use all from "../data/train"
-#prop=[1000,0.75,0,0.25] # mix data from multiple directories
 # save txt files with per epoch loss?
 saveL1 = False
 
