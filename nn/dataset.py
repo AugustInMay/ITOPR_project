@@ -158,7 +158,7 @@ class TurbDataset(Dataset):
         # load & normalize data
         self = LoaderNormalizer(self, isTest=(mode==self.TEST), ratio=ratio)
         
-        self.totalLength = int(500 * ratio)
+        self.totalLength = 500
 
         if mode == self.TEST:
             self.totalLength = int(500 * (1 - ratio))
