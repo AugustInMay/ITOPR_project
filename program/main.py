@@ -22,7 +22,7 @@ def file_choice():
         print("Wrong input. Enter y or n to choose the option")
         key = input()
 
-    else:
+    if key == 'n':
         print("Enter smoke density file name:")
         name = input()
         f_names[0] = name
