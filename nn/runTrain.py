@@ -25,7 +25,7 @@ expo = 5
 # data set config
 prop=None # by default, use all from "../data/train"
 # save txt files with per epoch loss?
-saveL1 = False
+saveL1 = True
 
 ##########################
 
