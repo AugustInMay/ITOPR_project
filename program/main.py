@@ -57,8 +57,8 @@ if __name__ == '__main__':
         nan_val += np.count_nonzero(np.isnan(fields[-1]))
 
 
-    if int(nan_val) == 0:
-        print("No noise points were discovered. Continuing with step forward...")
+    if int(nan_val) != 0:
+        print(str(nan_val) + " noise points were discovered, proceeding with approximation")
 
         tmp = ["smoke", "vel_x", "vel_y", "pressure"]
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
         print("Done!")
 
     else:
-        print(str(nan_val) + " noise points were discovered, proceeding with approximation")
+        print("No noise points were discovered. Continuing with step forward...")
 
         inputs = torch.FloatTensor(1, 4, 100, 100)
         inputs = Variable(inputs)
