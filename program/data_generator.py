@@ -271,7 +271,4 @@ def refractor_data():
             pylab.close('all')
 
 
-print("Enter your number: ")
-num = str(input())
-for i in range(87, 100):
-    save_simple_data(True, str(num) + "_" + str(i))
+save_noised_data(True)

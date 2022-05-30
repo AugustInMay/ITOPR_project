@@ -10,8 +10,6 @@ from DfpNet import UNet_, weights_init
 import utils
 from utils import log
 
-print
-
 suffix = "" # customize loading & output if necessary
 prefix = ""
 if len(sys.argv)>1:

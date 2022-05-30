@@ -27,7 +27,7 @@ def find_absmax(data, use_targets, x):
 ######################################## DATA LOADER #########################################
 #         also normalizes data with max , and optionally makes it dimensionless              #
 
-def LoaderNormalizer(data, isTest = False, shuffle = 0):
+def LoaderNormalizer(data, isTest = False, shuffle = 0, ratio = 0.8):
     """
     # data: pass TurbDataset object with initialized dataDir / dataDirTest paths
     # train: when off, process as test data (first load regular for normalization if needed, then replace by test data)
@@ -37,28 +37,61 @@ def LoaderNormalizer(data, isTest = False, shuffle = 0):
     """
 
     # load single directory
-    data.inputs  = np.empty((400, 4, 100, 100))
-    data.targets = np.empty((400, 4, 100, 100))
-    
+    # if ratio==0.8:
+    #     data.inputs  = np.empty((400, 4, 100, 100))
+    #     data.targets = np.empty((400, 4, 100, 100))
+        
+    #     count = 0
+
+    #     for i in range(1,5):
+    #         for j in range(100):
+    #             sm = np.load(data.dataDir + "smoke" + str(i) + "_" + str(j) + ".npy")
+    #             vel_x = np.load(data.dataDir + "vel_x" + str(i)+ "_" + str(j) + ".npy")
+    #             vel_y = np.load(data.dataDir + "vel_y" + str(i)+ "_" + str(j) + ".npy")
+    #             pres = np.load(data.dataDir + "pressure" + str(i)+ "_" + str(j) + ".npy")
+    #             data.inputs[count] = np.array([sm, vel_x, vel_y, pres])
+
+    #             sm = np.load(data.dataDir + "smoke" + str(i)+ "_" + str(j) + "_target.npy")
+    #             vel_x = np.load(data.dataDir + "vel_x" + str(i)+ "_" + str(j) + "_target.npy")
+    #             vel_y = np.load(data.dataDir + "vel_y" + str(i)+ "_" + str(j) + "_target.npy")
+    #             pres = np.load(data.dataDir + "pressure" + str(i)+ "_" + str(j) + "_target.npy")
+    #             data.targets[count] = np.array([sm, vel_x, vel_y, pres])
+
+    #             count += 1
+
+    # else:
+    data.inputs  = np.empty((500, 4, 100, 100))
+    data.targets = np.empty((500, 4, 100, 100))
     count = 0
 
-    for i in range(1,5):
-        for j in range(100):
+    first_range = random.sample(range(1,6), k=5)
+    second_range = random.sample(range(100), k=100)
+
+    for i in first_range:
+        second_range = random.sample(range(100), k=100)
+        for j in second_range:
             sm = np.load(data.dataDir + "smoke" + str(i) + "_" + str(j) + ".npy")
             vel_x = np.load(data.dataDir + "vel_x" + str(i)+ "_" + str(j) + ".npy")
             vel_y = np.load(data.dataDir + "vel_y" + str(i)+ "_" + str(j) + ".npy")
             pres = np.load(data.dataDir + "pressure" + str(i)+ "_" + str(j) + ".npy")
             data.inputs[count] = np.array([sm, vel_x, vel_y, pres])
+            
+            if self.dataDir == "data_3_1":
+                sm = np.load(data.dataDir + "smoke_target" + str(i)+ "_" + str(j) + ".npy")
+                vel_x = np.load(data.dataDir + "vel_x_target" + str(i)+ "_" + str(j) + ".npy")
+                vel_y = np.load(data.dataDir + "vel_y_target" + str(i)+ "_" + str(j) + ".npy")
+                pres = np.load(data.dataDir + "pressure_target" + str(i)+ "_" + str(j) + ".npy")
+            else:
+                sm = np.load(data.dataDir + "smoke" + str(i)+ "_" + str(j) + "_target.npy")
+                vel_x = np.load(data.dataDir + "vel_x" + str(i)+ "_" + str(j) + "_target.npy")
+                vel_y = np.load(data.dataDir + "vel_y" + str(i)+ "_" + str(j) + "_target.npy")
+                pres = np.load(data.dataDir + "pressure" + str(i)+ "_" + str(j) + "_target.npy")
 
-            sm = np.load(data.dataDir + "smoke" + str(i)+ "_" + str(j) + "_target.npy")
-            vel_x = np.load(data.dataDir + "vel_x" + str(i)+ "_" + str(j) + "_target.npy")
-            vel_y = np.load(data.dataDir + "vel_y" + str(i)+ "_" + str(j) + "_target.npy")
-            pres = np.load(data.dataDir + "pressure" + str(i)+ "_" + str(j) + "_target.npy")
             data.targets[count] = np.array([sm, vel_x, vel_y, pres])
 
             count += 1
 
-
+            
     ###################################### NORMALIZATION  OF TEST DATA #############################################
 
     if isTest:
@@ -98,7 +131,7 @@ class TurbDataset(Dataset):
     TRAIN = 0
     TEST  = 2
 
-    def __init__(self, mode=TRAIN, dataDir="../data_2/train/", dataDirTest="../data_2/test/", normMode=0):
+    def __init__(self, mode=TRAIN, dataDir="../data_2/train/", dataDirTest="../data_2/test/", normMode=0, ratio=0.8):
         global makeDimLess, removePOffset
         """
         :param dataProp: for split&mix from multiple dirs, see LoaderNormalizer; None means off
@@ -123,16 +156,16 @@ class TurbDataset(Dataset):
         self.dataDirTest = dataDirTest # only for mode==self.TEST
 
         # load & normalize data
-        self = LoaderNormalizer(self, isTest=(mode==self.TEST))
+        self = LoaderNormalizer(self, isTest=(mode==self.TEST), ratio=ratio)
         
-        self.totalLength = 400
+        self.totalLength = int(500 * ratio)
 
         if mode == self.TEST:
-            self.totalLength = 100
+            self.totalLength = int(500 * (1 - ratio))
 
         if not self.mode==self.TEST:
             # split for train/validation sets (80/20) , max 400
-            targetLength = self.totalLength - min( int(self.totalLength*0.2) , 400)
+            targetLength = int(500 * (1 - ratio))
 
             self.valiInputs = self.inputs[targetLength:]
             self.valiTargets = self.targets[targetLength:]

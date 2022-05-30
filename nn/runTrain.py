@@ -53,7 +53,7 @@ torch.cuda.manual_seed_all(seed)
 #torch.backends.cudnn.deterministic=True # warning, slower
 
 # create pytorch data object with dfp dataset
-data = dataset.TurbDataset()
+data = dataset.TurbDataset(data_dir = "../data_3_2/", ratio=0.1)
 trainLoader = DataLoader(data, batch_size=batch_size, shuffle=True, drop_last=True)
 print("Training batches: {}".format(len(trainLoader)))
 dataValidation = dataset.ValiDataset(data)
