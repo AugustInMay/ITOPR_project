@@ -158,6 +158,7 @@ if len(sys.argv)>1:
     prefix = sys.argv[1]
     print("Output prefix: {}".format(prefix))
 
+torch.save(netG.state_dict(), prefix + "modelG" )
 
 testLoader = valiLoader
 targets = torch.FloatTensor(1, 4, 100, 100)
@@ -274,8 +275,4 @@ if len(losses)>1:
 	avgLoss /= len(losses)
 	lossStdErr = np.std(losses) / math.sqrt(len(losses))
 	log(lf, "Averaged relative error and std dev across models:   %f , %f " % (avgLoss,lossStdErr) )
-
-
-
-torch.save(netG.state_dict(), prefix + "modelG" )
-
+    
