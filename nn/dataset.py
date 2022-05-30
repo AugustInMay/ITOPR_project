@@ -76,7 +76,7 @@ def LoaderNormalizer(data, isTest = False, shuffle = 0, ratio = 0.8):
             pres = np.load(data.dataDir + "pressure" + str(i)+ "_" + str(j) + ".npy")
             data.inputs[count] = np.array([sm, vel_x, vel_y, pres])
             
-            if self.dataDir == "data_3_1":
+            if data.dataDir == "../data_3_1/":
                 sm = np.load(data.dataDir + "smoke_target" + str(i)+ "_" + str(j) + ".npy")
                 vel_x = np.load(data.dataDir + "vel_x_target" + str(i)+ "_" + str(j) + ".npy")
                 vel_y = np.load(data.dataDir + "vel_y_target" + str(i)+ "_" + str(j) + ".npy")

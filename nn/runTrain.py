@@ -210,8 +210,9 @@ for si in range(25):
     for i, data in enumerate(testLoader, 0):
         inputs_cpu, targets_cpu = data
         targets_cpu, inputs_cpu = targets_cpu.float().cuda(), inputs_cpu.float().cuda()
-        inputs.data.resize_as_(inputs_cpu).copy_(inputs_cpu)
-        targets.data.resize_as_(targets_cpu).copy_(targets_cpu)
+        with torch.no_grad():
+            inputs.resize_as_(inputs_cpu).copy_(inputs_cpu)
+            targets.resize_as_(targets_cpu).copy_(targets_cpu)
 
         outputs = netG(inputs)
         outputs_cpu = outputs.data.cpu().numpy()[0]
