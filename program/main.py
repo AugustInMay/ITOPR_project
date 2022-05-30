@@ -57,7 +57,7 @@ if __name__ == '__main__':
         nan_val += np.count_nonzero(np.isnan(fields[-1]))
 
 
-    if nan_val == 0:
+    if int(nan_val) == 0:
         print("No noise points were discovered. Continuing with step forward...")
 
         tmp = ["smoke", "vel_x", "vel_y", "pressure"]
