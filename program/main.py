@@ -65,7 +65,7 @@ if __name__ == '__main__':
         for i in range(4):
             print("Beginning to approximate...")
 
-            orig = saver.read_np_f(files_n[i][:-6])
+            orig = saver.read_np_f(files_n[i])
             adapter.count_p(fields[i])
             print(np.sum(np.abs(orig - fields[i]))/np.sum(np.abs(fields[i])))
             saver.save_np_f(fields[i], files_n[i] + "_app")
