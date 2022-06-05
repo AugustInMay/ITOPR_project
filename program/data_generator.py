@@ -130,47 +130,47 @@ def save_simple_data(plot=False, specific_name = ''):
     del lst_inp
     del lst_targ_np
 
-def save_generated_data_for_train(plot=False, specific_name = ''):
-    Path("../data/train").mkdir(parents=True, exist_ok=True)
-    lst = generate_data(plot, specific_name)
-    names = ["vel", "smoke", 'pressure']
+# def save_generated_data_for_train(plot=False, specific_name = ''):
+#     Path("../data/train").mkdir(parents=True, exist_ok=True)
+#     lst = generate_data(plot, specific_name)
+#     names = ["vel", "smoke", 'pressure']
 
-    for i in range(3):
-        saver.save_tensor_f(lst[i].values, '../data/train' + names[i] + specific_name)
+#     for i in range(3):
+#         saver.save_tensor_f(lst[i].values, '../data/train' + names[i] + specific_name)
 
-    del lst
+#     del lst
     
-def save_generated_data_for_test(plot=False, specifin_name=''):
-    Path("../data/test/").mkdir(parents=True, exist_ok=True)
-    velocity, smoke, pressure = generate_data(plot, specific_name=specifin_name)
+# def save_generated_data_for_test(plot=False, specifin_name=''):
+#     Path("../data/test/").mkdir(parents=True, exist_ok=True)
+#     velocity, smoke, pressure = generate_data(plot, specific_name=specifin_name)
 
-    lst = grid_to_np(velocity, smoke, pressure)
-    names = ["vel_x", "vel_y", "smoke", 'pressure']
+#     lst = grid_to_np(velocity, smoke, pressure)
+#     names = ["vel_x", "vel_y", "smoke", 'pressure']
     
-    lst[0] = np.transpose(lst[0])
-    lst[0] = np.append(lst[0], [lst[0][-1]], axis=0)
-    lst[0] = np.transpose(lst[0])
-    lst[1] = np.append(lst[1], [lst[1][-1]], axis=0)
+#     lst[0] = np.transpose(lst[0])
+#     lst[0] = np.append(lst[0], [lst[0][-1]], axis=0)
+#     lst[0] = np.transpose(lst[0])
+#     lst[1] = np.append(lst[1], [lst[1][-1]], axis=0)
 
-    for i in range(4):
-        saver.save_np_f(lst[i], "../data/test/" + names[i] + specifin_name)
+#     for i in range(4):
+#         saver.save_np_f(lst[i], "../data/test/" + names[i] + specifin_name)
 
-    for i in range(2):
-        velocity, smoke, pressure = step(velocity, smoke, pressure)
+#     for i in range(2):
+#         velocity, smoke, pressure = step(velocity, smoke, pressure)
 
-    lst = grid_to_np(velocity, smoke, pressure)
-    names = ["vel_x", "vel_y", "smoke", 'pressure']
+#     lst = grid_to_np(velocity, smoke, pressure)
+#     names = ["vel_x", "vel_y", "smoke", 'pressure']
 
-    lst[0] = np.transpose(lst[0])
-    lst[0] = np.append(lst[0], [lst[0][-1]], axis=0)
-    lst[0] = np.transpose(lst[0])
-    lst[1] = np.append(lst[1], [lst[1][-1]], axis=0)
+#     lst[0] = np.transpose(lst[0])
+#     lst[0] = np.append(lst[0], [lst[0][-1]], axis=0)
+#     lst[0] = np.transpose(lst[0])
+#     lst[1] = np.append(lst[1], [lst[1][-1]], axis=0)
 
-    for i in range(4):
-        saver.save_np_f(lst[i], "../data/test/" + names[i] + "_target" + specifin_name)
-        saver.save_np_scaled_img(lst[i], "../pics/" + names[i] + "_target" + specifin_name)
+#     for i in range(4):
+#         saver.save_np_f(lst[i], "../data/test/" + names[i] + "_target" + specifin_name)
+#         saver.save_np_scaled_img(lst[i], "../pics/" + names[i] + "_target" + specifin_name)
 
-    pylab.close('all')
+#     pylab.close('all')
 
 def generate_noised_data(plot = False):
     velocity, smoke, pressure = generate_data(plot)
@@ -218,57 +218,57 @@ def save_noised_data(plot=False):
         saver.save_np_f(lst[i], names[i])
 
 
-def refractor_data():
-    for i in range(2,3):
-        for j in range(100):
-            smoke = saver.read_tensor_f("../data/train/smoke" + str(i) + "_" + str(j))
-            pres = saver.read_tensor_f("../data/train/pressure" + str(i) + "_" + str(j))
-            vel = saver.read_tensor_f("../data/train/vel" + str(i) + "_" + str(j))
+# def refractor_data():
+#     for i in range(2,3):
+#         for j in range(100):
+#             smoke = saver.read_tensor_f("../data/train/smoke" + str(i) + "_" + str(j))
+#             pres = saver.read_tensor_f("../data/train/pressure" + str(i) + "_" + str(j))
+#             vel = saver.read_tensor_f("../data/train/vel" + str(i) + "_" + str(j))
 
-            pressure = CenteredGrid(pres, extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100])
-            smoke = CenteredGrid(smoke, extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100])
-            velocity = StaggeredGrid(vel, extrapolation.ZERO, x=100, y=100, bounds=Box[0:100, 0:100])
+#             pressure = CenteredGrid(pres, extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100])
+#             smoke = CenteredGrid(smoke, extrapolation.BOUNDARY, x=100, y=100, bounds=Box[0:100, 0:100])
+#             velocity = StaggeredGrid(vel, extrapolation.ZERO, x=100, y=100, bounds=Box[0:100, 0:100])
 
-            vel_x = velocity.values.vector[0].numpy('y,x')
-            vel_y = velocity.values.vector[1].numpy('y,x')
+#             vel_x = velocity.values.vector[0].numpy('y,x')
+#             vel_y = velocity.values.vector[1].numpy('y,x')
 
-            vel_x = np.transpose(vel_x)
-            vel_x = np.append(vel_x, [vel_x[-1]], axis=0)
-            vel_x = np.transpose(vel_x)
-            vel_y = np.append(vel_y, [vel_y[-1]], axis=0)
+#             vel_x = np.transpose(vel_x)
+#             vel_x = np.append(vel_x, [vel_x[-1]], axis=0)
+#             vel_x = np.transpose(vel_x)
+#             vel_y = np.append(vel_y, [vel_y[-1]], axis=0)
             
-            saver.save_np_f(pressure.values.numpy('y,x'), "../data/train/" + "pressure" + str(i) + "_" + str(j))
-            saver.save_np_f(smoke.values.numpy('y,x'), "../data/train/" + "smoke" + str(i) + "_" + str(j))
-            saver.save_np_f(vel_x, "../data/train/" + "vel_x" + str(i) + "_" + str(j))
-            saver.save_np_f(vel_y, "../data/train/" + "vel_y" + str(i) + "_" + str(j))
+#             saver.save_np_f(pressure.values.numpy('y,x'), "../data/train/" + "pressure" + str(i) + "_" + str(j))
+#             saver.save_np_f(smoke.values.numpy('y,x'), "../data/train/" + "smoke" + str(i) + "_" + str(j))
+#             saver.save_np_f(vel_x, "../data/train/" + "vel_x" + str(i) + "_" + str(j))
+#             saver.save_np_f(vel_y, "../data/train/" + "vel_y" + str(i) + "_" + str(j))
 
-            saver.save_np_scaled_img(pressure.values.numpy('y,x'), "../pics/" + "pressure" + str(i) + "_" + str(j))
-            saver.save_np_scaled_img(smoke.values.numpy('y,x'), "../pics/" + "smoke" + str(i) + "_" + str(j))
-            saver.save_np_scaled_img(vel_x, "../pics/" + "vel_x" + str(i) + "_" + str(j))
-            saver.save_np_scaled_img(vel_y, "../pics/" + "vel_y" + str(i) + "_" + str(j))
+#             saver.save_np_scaled_img(pressure.values.numpy('y,x'), "../pics/" + "pressure" + str(i) + "_" + str(j))
+#             saver.save_np_scaled_img(smoke.values.numpy('y,x'), "../pics/" + "smoke" + str(i) + "_" + str(j))
+#             saver.save_np_scaled_img(vel_x, "../pics/" + "vel_x" + str(i) + "_" + str(j))
+#             saver.save_np_scaled_img(vel_y, "../pics/" + "vel_y" + str(i) + "_" + str(j))
 
-            for k in range(2):
-                velocity, smoke, pressure = step(velocity, smoke, pressure)
+#             for k in range(2):
+#                 velocity, smoke, pressure = step(velocity, smoke, pressure)
 
-            vel_x = velocity.values.vector[0].numpy('y,x')
-            vel_y = velocity.values.vector[1].numpy('y,x')
+#             vel_x = velocity.values.vector[0].numpy('y,x')
+#             vel_y = velocity.values.vector[1].numpy('y,x')
 
-            vel_x = np.transpose(vel_x)
-            vel_x = np.append(vel_x, [vel_x[-1]], axis=0)
-            vel_x = np.transpose(vel_x)
-            vel_y = np.append(vel_y, [vel_y[-1]], axis=0)
+#             vel_x = np.transpose(vel_x)
+#             vel_x = np.append(vel_x, [vel_x[-1]], axis=0)
+#             vel_x = np.transpose(vel_x)
+#             vel_y = np.append(vel_y, [vel_y[-1]], axis=0)
             
-            saver.save_np_f(pressure.values.numpy('y,x'), "../data/train/" + "pressure_target" + str(i) + "_" + str(j))
-            saver.save_np_f(smoke.values.numpy('y,x'), "../data/train/" + "smoke_target" + str(i) + "_" + str(j))
-            saver.save_np_f(vel_x, "../data/train/" + "vel_x_target" + str(i) + "_" + str(j))
-            saver.save_np_f(vel_y, "../data/train/" + "vel_y_target" + str(i) + "_" + str(j))
+#             saver.save_np_f(pressure.values.numpy('y,x'), "../data/train/" + "pressure_target" + str(i) + "_" + str(j))
+#             saver.save_np_f(smoke.values.numpy('y,x'), "../data/train/" + "smoke_target" + str(i) + "_" + str(j))
+#             saver.save_np_f(vel_x, "../data/train/" + "vel_x_target" + str(i) + "_" + str(j))
+#             saver.save_np_f(vel_y, "../data/train/" + "vel_y_target" + str(i) + "_" + str(j))
 
-            saver.save_np_scaled_img(pressure.values.numpy('y,x'), "../pics/" + "pressure_target" + str(i) + "_" + str(j))
-            saver.save_np_scaled_img(smoke.values.numpy('y,x'), "../pics/" + "smoke_target" + str(i) + "_" + str(j))
-            saver.save_np_scaled_img(vel_x, "../pics/" + "vel_x_target" + str(i) + "_" + str(j))
-            saver.save_np_scaled_img(vel_y, "../pics/" + "vel_y_target" + str(i) + "_" + str(j))
+#             saver.save_np_scaled_img(pressure.values.numpy('y,x'), "../pics/" + "pressure_target" + str(i) + "_" + str(j))
+#             saver.save_np_scaled_img(smoke.values.numpy('y,x'), "../pics/" + "smoke_target" + str(i) + "_" + str(j))
+#             saver.save_np_scaled_img(vel_x, "../pics/" + "vel_x_target" + str(i) + "_" + str(j))
+#             saver.save_np_scaled_img(vel_y, "../pics/" + "vel_y_target" + str(i) + "_" + str(j))
 
-            pylab.close('all')
+#             pylab.close('all')
 
 
 save_noised_data(True)
