@@ -71,7 +71,7 @@ if __name__ == '__main__':
             saver.save_np_f(fields[i], files_n[i] + "_app")
             saver.save_np_scaled_img(fields[i], files_n[i] + "_app")
 
-            print("Approximated ", tmp[i], end = '.')
+            print("Approximated ", tmp[i], end = '.\n')
 
         
         print("Done!")

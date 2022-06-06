@@ -3,7 +3,7 @@ from phi.torch.flow import *
 import pylab
 import saver
 from pathlib import Path
-
+import os
 
 def step(velocity, smoke, pressure, dt=1.0, buoyancy_factor=1.0, INFLOW = None):
     NU = 0.01
@@ -270,5 +270,20 @@ def save_noised_data(plot=False):
 
 #             pylab.close('all')
 
+for i in range(100):
+    print("Processing " + str(i) + "...")
 
-save_noised_data(True)
+    names = ["vel_x", "vel_y", "smoke", 'pressure']
+    np_s = list()
+    
+    for el in names:
+        np_s.append(saver.read_np_f("../data_3_2/" + el + "1_" + str(i)))
+        saver.save_np_f(np_s[-1], "../data_noised/" + el + str(i) + "_orig")
+        saver.save_np_scaled_img(np_s[-1], "../noised_pics/" + el + str(i) + "_orig")
+
+    for el in np_s:
+        el = scatter_noise(el)
+
+    for j in range(4):
+        saver.save_np_f(np_s[j], "../data_noised/" + names[j] + str(i) + "_noised")
+        saver.save_np_scaled_img(np.where(np.isnan(np_s[j]), 0, np_s[j]), "../noised_pics/" + names[j] + str(i) + "_noised")
