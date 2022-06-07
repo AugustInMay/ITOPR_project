@@ -21,8 +21,6 @@ def weights_init(m):
 def blockUNet(in_c, out_c, name, transposed=False, bn=True, relu=True, size=4, str_ = 2, pad=1, dropout=0., sf=2):
     block = nn.Sequential()
 
-    block.add_module('%s_relu' % name, nn.ReLU(inplace=True))
-
     if relu:
         block.add_module('%s_relu' % name, nn.ReLU(inplace=False))
     else:
@@ -38,6 +36,7 @@ def blockUNet(in_c, out_c, name, transposed=False, bn=True, relu=True, size=4, s
     if dropout>0.:
         block.add_module('%s_dropout' % name, nn.Dropout2d( dropout, inplace=True))
     return block
+
     
 # generator model
 class UNet_(nn.Module):
@@ -78,5 +77,65 @@ class UNet_(nn.Module):
         dout2 = self.dlayer2(dout2b_out2)
         dout2_out1 = torch.cat([dout2, out1], 1)
         dout1 = self.dlayer1(dout2_out1)
+
+        return dout1
+
+
+class DefNet_(nn.Module):
+    def __init__(self):
+        super(DefNet_, self).__init__()
+
+        self.layers = nn.Sequential(
+            nn.Linear(100, 150),
+            nn.ReLU(),
+            nn.Linear(150, 200),
+            nn.ReLU(),
+            nn.Linear(200, 250),
+            nn.ReLU(),
+            nn.Linear(250, 200),
+            nn.ReLU(),
+            nn.Linear(200, 150),
+            nn.ReLU(),
+            nn.Linear(150, 100)
+        )
+
+    def forward(self, x):
+        return self.layers(x)
+
+class EncDec_(nn.Module):
+    def __init__(self, channelExponent=6, dropout=0.):
+        super(EncDec_, self).__init__()
+        channels = int(2 ** channelExponent + 0.5)
+
+        self.layer1 = nn.Sequential()
+        self.layer1.add_module('layer1_conv', nn.Conv2d(4, channels, 4, 2, 1, bias=True))
+
+        self.layer2 = blockUNet(channels  , channels*2, 'layer2', transposed=False, bn=True, relu=False, dropout=dropout )
+        self.layer2b= blockUNet(channels*2, channels*4, 'layer2b',transposed=False, bn=True, relu=False, dropout=dropout, size=3, str_=5)
+        self.layer3 = blockUNet(channels*4, channels*8, 'layer3', transposed=False, bn=True, relu=False, dropout=dropout, size=5, str_=5)
+        # note the following layer also had a kernel size of 2 in the original version (cf https://arxiv.org/abs/1810.08217)
+        # it is now changed to size 4 for encoder/decoder symmetry; to reproduce the old/original results, please change it to 2
+     
+        # note, kernel size is internally reduced by one now
+        self.dlayer3 = blockUNet(channels*8, channels*4, 'dlayer3', transposed=True, bn=True, relu=True, dropout=dropout, sf = 5)
+        self.dlayer2b= blockUNet(channels*4, channels*2, 'dlayer2b',transposed=True, bn=True, relu=True, dropout=dropout, sf = 5)
+        self.dlayer2 = blockUNet(channels*2, channels  , 'dlayer2', transposed=True, bn=True, relu=True, dropout=dropout)
+
+        self.dlayer1 = nn.Sequential()
+        self.dlayer1.add_module('dlayer1_relu', nn.ReLU(inplace=True))
+        self.dlayer1.add_module('dlayer1_tconv', nn.ConvTranspose2d(channels, 4, 4, 2, 1, bias=True))
+
+    def forward(self, x):
+        out1 = self.layer1(x)
+
+        out2 = self.layer2(out1)
+        out2b= self.layer2b(out2)
+        out3 = self.layer3(out2b)
+
+        dout3 = self.dlayer3(out3)
+
+        dout2b = self.dlayer2b(dout3)
+        dout2 = self.dlayer2(dout2b)
+        dout1 = self.dlayer1(dout2)
 
         return dout1

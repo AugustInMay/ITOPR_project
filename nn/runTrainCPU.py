@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader
 import torch.optim as optim
 
-from DfpNet import UNet_, DefNet_, weights_init
+from DfpNet import UNet_, DefNet_, EncDec_, weights_init
 import dataset
 import utils
 from utils import log
@@ -49,7 +49,6 @@ print("Random seed: {}".format(seed))
 random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
-torch.cuda.manual_seed_all(seed)
 #torch.backends.cudnn.deterministic=True # warning, slower
 
 # create pytorch data object with dfp dataset
@@ -72,17 +71,12 @@ netG.apply(weights_init)
 if len(doLoad)>0:
     netG.load_state_dict(torch.load(doLoad))
     print("Loaded model "+doLoad)
-netG.cuda()
 
 criterionL1 = nn.L1Loss()
-criterionL1.cuda()
-
 optimizerG = optim.Adam(netG.parameters(), lr=lrG, betas=(0.5, 0.999), weight_decay=0.0)
 
 targets = Variable(torch.FloatTensor(batch_size, 4, 100, 100))
 inputs  = Variable(torch.FloatTensor(batch_size, 4, 100, 100))
-targets = targets.cuda()
-inputs  = inputs.cuda()
 
 ##########################
 
@@ -93,7 +87,6 @@ for epoch in range(epochs):
     L1_accum = 0.0
     for i, traindata in enumerate(trainLoader, 0):
         inputs_cpu, targets_cpu = traindata
-        targets_cpu, inputs_cpu = targets_cpu.float().cuda(), inputs_cpu.float().cuda()
         inputs.resize_as_(inputs_cpu).copy_(inputs_cpu)
         targets.resize_as_(targets_cpu).copy_(targets_cpu)
 
@@ -163,17 +156,13 @@ torch.save(netG.state_dict(), prefix + "modelG" )
 testLoader = valiLoader
 targets = torch.FloatTensor(1, 4, 100, 100)
 targets = Variable(targets)
-targets = targets.cuda()
 inputs = torch.FloatTensor(1, 4, 100, 100)
 inputs = Variable(inputs)
-inputs = inputs.cuda()
 
 targets_dn = torch.FloatTensor(1, 4, 100, 100)
 targets_dn = Variable(targets_dn)
-targets_dn = targets_dn.cuda()
 outputs_dn = torch.FloatTensor(1, 4, 100, 100)
 outputs_dn = Variable(outputs_dn)
-outputs_dn = targets_dn.cuda()
 
 lf = "./" + prefix + "testout{}.txt".format(suffix) 
 utils.makeDirs(["results_test"])
@@ -195,10 +184,8 @@ for si in range(25):
     log(lf, "Loading " + modelFn )
     netG.load_state_dict( torch.load(modelFn) )
     log(lf, "Loaded " + modelFn )
-    netG.cuda()
 
     criterionL1 = nn.L1Loss()
-    criterionL1.cuda()
     L1val_accum = 0.0
     L1val_dn_accum = 0.0
     lossPer_s_accum = 0
@@ -210,7 +197,6 @@ for si in range(25):
 
     for i, data in enumerate(testLoader, 0):
         inputs_cpu, targets_cpu = data
-        targets_cpu, inputs_cpu = targets_cpu.float().cuda(), inputs_cpu.float().cuda()
         with torch.no_grad():
             inputs.resize_as_(inputs_cpu).copy_(inputs_cpu)
             targets.resize_as_(targets_cpu).copy_(targets_cpu)
