@@ -14,7 +14,7 @@ import csv
 ######## Settings ########
 
 iterations_ = (10000, 50000)
-batch_sizes = (1, 5, 10)
+batch_sizes = (2, 5, 10)
 lrs = (1e-02, 1e-03, 1e-04, 1e-05)
 decays = (True, False)
 expos = (4, 5, 6, 7)
@@ -79,7 +79,7 @@ for iterations in iterations_:
                     trainLoader = DataLoader(data, batch_size=batch_size, shuffle=True, drop_last=True)
                     #print("Training batches: {}".format(len(trainLoader)))
                     dataValidation = dataset.ValiDataset(data)
-                    valiLoader = DataLoader(dataValidation, batch_size=batch_size, shuffle=False, drop_last=True) 
+                    valiLoader = DataLoader(dataValidation, batch_size=1, shuffle=False, drop_last=True) 
                     #print("Validation batches: {}".format(len(valiLoader)))
 
                     # setup training
