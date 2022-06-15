@@ -14,7 +14,7 @@ import csv
 ######## Settings ########
 
 iterations_ = (10000, 50000)
-batch_sizes = (2, 5, 10)
+batch_sizes = (1, 5, 10)
 lrs = (1e-02, 1e-03, 1e-04, 1e-05)
 decays = (True, False)
 expos = (4, 5, 6, 7)
@@ -84,7 +84,7 @@ for iterations in iterations_:
 
                     # setup training
                     epochs = int(iterations/len(trainLoader) + 0.5)
-                    netG = UNet_(channelExponent=expo, dropout=dropout)
+                    netG = UNet_(channelExponent=expo, bn=batch_size != 1, dropout=dropout)
                     #print(netG) # print full net
                     model_parameters = filter(lambda p: p.requires_grad, netG.parameters())
                     params = sum([np.prod(p.size()) for p in model_parameters])
