@@ -77,11 +77,13 @@ if __name__ == '__main__':
 
         end_ = time.time()
 
-        print("Готово! Процесс занял %.2f" %(end_-start_))
+        print("Готово! Процесс занял %.1f секунд(ы)" %(end_-start_))
 
     else:
         print("Не было обнаружено неизвестных точек. Начинаю процесс прогнозирования...")
-
+        
+        start_ = time.time()
+        
         inputs = torch.FloatTensor(1, 4, 100, 100)
         inputs = Variable(inputs)
         
@@ -100,7 +102,9 @@ if __name__ == '__main__':
         for i in range(4):
             saver.save_np_f(outputs_cpu[i], files_n[i] + "_next")
             saver.save_np_scaled_img(outputs_cpu[i], files_n[i] + "_next")
-
-        print("Готово!")
+        
+        end_ = time.time()
+        
+        print("Готово! Процесс занял %.1f секунд(ы)" %(end_-start_))
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
