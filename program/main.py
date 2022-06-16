@@ -1,14 +1,14 @@
-from phi.torch.flow import *
-import pylab
+#from phi.torch.flow import *
+
 import saver
 import adapter
 import os
 import numpy as np
 
+import time 
 import torch
-import torch.nn as nn
 from torch.autograd import Variable
-from DfpNet import UNet_, weights_init
+from DfpNet import UNet_
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
@@ -16,26 +16,26 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 def file_choice():
     f_names = ["smoke", "vel_x", "vel_y", "pressure"]
 
-    print("Would you like to continue with default file names? Otherwise enter your custom ones: y/n")
+    print("Вы желаете продолжить работу с именами файлов по-умолчанию? Иначе введите произвольные: y/n")
     key = input().lower()
     while key != 'y' and key != 'n':
-        print("Wrong input. Enter y or n to choose the option")
+        print("Неправильный ввод. Введите латинские буквы 'y' или 'n', означающие yes (да) и no (нет) соответсвенно: ")
         key = input()
 
     if key == 'n':
-        print("Enter smoke density file name:")
+        print("Введите имя файла с концентрацией жидкости:")
         name = input()
         f_names[0] = name
 
-        print("Enter velocity by x file name:")
+        print("Введите имя файла с скоростью жидкости по координате X:")
         name = input()
         f_names[1] = name
 
-        print("Enter velocity by y file name:")
+        print("Введите имя файла с скоростью жидкости по координате Y:")
         name = input()
         f_names[2] = name
 
-        print("Enter pressure file name:")
+        print("Введите имя файла с давлением среды:")
         name = input()
         f_names[3] = name
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     for el in files_n:
         if not os.path.isfile(el + ".npy"):
-            print("'" + el + ".npy' file doesn't exist! Please check your filename again:")
+            print("Файл '" + el + ".npy' не существует! Пожалуйста, проверьте его наличие или измените имя:")
             break
 
         fields.append(saver.read_np_f(el))
@@ -58,12 +58,14 @@ if __name__ == '__main__':
 
 
     if int(nan_val) != 0:
-        print(str(nan_val) + " noise points were discovered, proceeding with approximation")
+        start_ = time.time()
 
+        print(str(nan_val) + " неизвестных точек обнаружено. Начинаю процесс аппроксимации")
+        
         tmp = ["smoke", "vel_x", "vel_y", "pressure"]
 
         for i in range(4):
-            print("Beginning to approximate...")
+            print("Начало аппроксимации...")
 
             orig = saver.read_np_f(files_n[i])
             adapter.count_p(fields[i])
@@ -71,13 +73,14 @@ if __name__ == '__main__':
             saver.save_np_f(fields[i], files_n[i] + "_app")
             saver.save_np_scaled_img(fields[i], files_n[i] + "_app")
 
-            print("Approximated ", tmp[i], end = '.\n')
+            print("Аппроксимировано  ", tmp[i], end = '.\n')
 
-        
-        print("Done!")
+        end_ = time.time()
+
+        print("Готово! Процесс занял %.2f" %(end_-start_))
 
     else:
-        print("No noise points were discovered. Continuing with step forward...")
+        print("Не было обнаружено неизвестных точек. Начинаю процесс прогнозирования...")
 
         inputs = torch.FloatTensor(1, 4, 100, 100)
         inputs = Variable(inputs)
@@ -98,6 +101,6 @@ if __name__ == '__main__':
             saver.save_np_f(outputs_cpu[i], files_n[i] + "_next")
             saver.save_np_scaled_img(outputs_cpu[i], files_n[i] + "_next")
 
-        print("Done!")
+        print("Готово!")
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
