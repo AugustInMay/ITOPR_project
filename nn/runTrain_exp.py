@@ -289,7 +289,7 @@ for batch_size in batch_sizes:
                     losses.append(lossPer_accum)
                     row = [str(epochs), str(batch_size), str(lrG), str(decayLr), str(expo), str(L1val_accum), str(lossPer_p_accum*100), str(lossPer_v_accum*100), str(lossPer_s_accum*100), str(lossPer_accum*100)]
                     rows.append(row)
-                    print("Done ", str(cnt), "/64 experiments", sep='') 
+                    print("Done ", str(cnt), "/96 experiments", sep='') 
                     cnt+=1
 
                 if len(losses)>1:
