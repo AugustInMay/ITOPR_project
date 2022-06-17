@@ -56,7 +56,7 @@ data = dataset.TurbDataset(dataDir = "../data_3_2/", ratio=0.1)
 trainLoader = DataLoader(data, batch_size=batch_size, shuffle=True, drop_last=True)
 print("Training batches: {}".format(len(trainLoader)))
 dataValidation = dataset.ValiDataset(data)
-valiLoader = DataLoader(dataValidation, batch_size=batch_size, shuffle=False, drop_last=True) 
+valiLoader = DataLoader(dataValidation, batch_size=1, shuffle=False, drop_last=True) 
 print("Validation batches: {}".format(len(valiLoader)))
 
 # setup training
