@@ -27,11 +27,11 @@ def file_choice():
         name = input()
         f_names[0] = name
 
-        print("Введите имя файла с скоростью жидкости по координате X:")
+        print("Введите имя файла со скоростью жидкости по координате X:")
         name = input()
         f_names[1] = name
 
-        print("Введите имя файла с скоростью жидкости по координате Y:")
+        print("Введите имя файла со скоростью жидкости по координате Y:")
         name = input()
         f_names[2] = name
 
@@ -54,6 +54,7 @@ if __name__ == '__main__':
             print("Файл '" + el + ".npy' не существует! Пожалуйста, проверьте его наличие или измените имя:")
             go_out = True
         else:
+            print("Файл '" + el + ".npy' успешно найден и прочитан!")
             fields.append(saver.read_np_f(el))
             nan_val += np.count_nonzero(np.isnan(fields[-1]))
 
@@ -81,18 +82,20 @@ if __name__ == '__main__':
 
         else:
             print("Не было обнаружено неизвестных точек. Начинаю процесс прогнозирования...")
-            
+            device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
             start_ = time.time()
             
             inputs = torch.FloatTensor(1, 4, 100, 100)
             inputs = Variable(inputs)
-            
+            inputs=inputs.to(device)
+
             for i in range(4):
                 inputs[0][i] = torch.from_numpy(fields[i])
 
-            netG = UNet_(channelExponent=5)
+            netG = UNet_(channelExponent=7)
             modelFn = "./" + "modelG"
-            netG.load_state_dict( torch.load(modelFn, map_location=torch.device('cpu')) )
+            netG.load_state_dict( torch.load(modelFn, map_location=device) )
 
             netG.eval()
 

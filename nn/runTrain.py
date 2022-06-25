@@ -17,11 +17,11 @@ iterations = 10000
 # batch size
 batch_size = 10
 # learning rate, generator
-lrG = 0.0006
+lrG = 0.001
 # decay learning rate?
 decayLr = True
 # channel exponent to control network size
-expo = 5
+expo = 7
 # data set config
 prop=None # by default, use all from "../data/train"
 # save txt files with per epoch loss?
@@ -62,7 +62,7 @@ print("Validation batches: {}".format(len(valiLoader)))
 
 # setup training
 epochs = int(iterations/len(trainLoader) + 0.5)
-netG = EncDec_(channelExponent=expo, dropout=dropout)
+netG = UNet_(channelExponent=expo, dropout=dropout)
 print(netG) # print full net
 model_parameters = filter(lambda p: p.requires_grad, netG.parameters())
 params = sum([np.prod(p.size()) for p in model_parameters])
@@ -77,7 +77,7 @@ netG.cuda()
 criterionL1 = nn.L1Loss()
 criterionL1.cuda()
 
-optimizerG = optim.Adam(netG.parameters(), lr=lrG, betas=(0.5, 0.999), weight_decay=0.0)
+optimizerG = optim.Adam(netG.parameters(), lr=lrG, weight_decay=0.0)
 
 targets = Variable(torch.FloatTensor(batch_size, 4, 100, 100))
 inputs  = Variable(torch.FloatTensor(batch_size, 4, 100, 100))
