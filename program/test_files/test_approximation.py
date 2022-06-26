@@ -24,10 +24,10 @@ for j in range(5):
     counted = []
 
     for i in range(4):
-        orig = saver.read_np_f("./test_files/noised_files/" + tmp[i] + str(j) + "_orig")
+        orig = saver.read_np_f("./noised_files/" + tmp[i] + str(j) + "_orig")
         original.append(orig)
         
-        to_count = saver.read_np_f("./test_files/noised_files/" + tmp[i] + str(j) + "_noised")
+        to_count = saver.read_np_f("./noised_files/" + tmp[i] + str(j) + "_noised")
         adapter.count_p(to_count)
         
         counted.append(to_count)

@@ -6,11 +6,9 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 
-import adapter
-import saver
 from dataset import TurbDataset
 from DfpNet import UNet_, weights_init
-import time 
+import saver 
 
 def progress(count, total, status=''):
     bar_len = 60
@@ -55,9 +53,7 @@ losses = []
 models = []
 
 print("Запускаю тестирование прогнозирования...")
-pred_max_time = 0
 
-start_oa = time.time()
 for si in range(25):
     s = chr(96+si)
     if(si==0): 
@@ -82,7 +78,6 @@ for si in range(25):
     netG.eval()
 
     for i, data in enumerate(testLoader, 0):
-        start_ = time.time()
         inputs_cpu, targets_cpu = data
         targets_cpu, inputs_cpu = targets_cpu.float().to(device), inputs_cpu.float().to(device)
         inputs.data.resize_as_(inputs_cpu).copy_(inputs_cpu)
@@ -91,41 +86,40 @@ for si in range(25):
         outputs = netG(inputs)
         outputs_cpu = outputs.data.cpu().numpy()[0]
         targets_cpu = targets_cpu.cpu().numpy()[0]
-        end_ = time.time()
 
-        if pred_max_time < (end_ - start_):
-            pred_max_time = end_ - start_
+        lossL1 = criterionL1(outputs, targets)
+        L1val_accum += lossL1.item()
+
         # precentage loss by ratio of means which is same as the ratio of the sum
+        lossPer_s = np.sum(np.abs(outputs_cpu[0] - targets_cpu[0]))/np.sum(np.abs(targets_cpu[0]))
+        lossPer_v_x = np.sum(np.abs(outputs_cpu[1] - targets_cpu[1]))/np.sum(np.abs(targets_cpu[1]))
+        lossPer_v_y = np.sum(np.abs(outputs_cpu[2] - targets_cpu[2]))/np.sum(np.abs(targets_cpu[2]))
+        #lossPer_v = ( np.sum(np.abs(outputs_cpu[1] - targets_cpu[1])) + np.sum(np.abs(outputs_cpu[2] - targets_cpu[2])) ) / ( np.sum(np.abs(targets_cpu[1])) + np.sum(np.abs(targets_cpu[2])) )
+        lossPer_p = np.sum(np.abs(outputs_cpu[3] - targets_cpu[3]))/np.sum(np.abs(targets_cpu[3]))
+
+        lossPer = np.sum(np.abs(outputs_cpu - targets_cpu))/np.sum(np.abs(targets_cpu))
+        lossPer_s_accum += lossPer_s.item()
+        #lossPer_v_accum += lossPer_v.item()
+        lossPer_p_accum += lossPer_p.item()
+        lossPer_accum += lossPer.item()
+        
+        print(str(i), "s", lossPer_s.item()*100, "v_x", lossPer_v_x.item()*100, "v_y", lossPer_v_y.item()*100,  "p", lossPer_p.item()*100, "overall", lossPer.item()*100)
+
+        tmp = ("smoke", "vel_x", "vel_y", "pres")
+        for j in range(4):
+            saver.save_np_scaled_img(inputs_cpu[i], "./pics/" + tmp[j] + str(i) + "_orig")
+            saver.save_np_scaled_img(targets_cpu[i], "./pics/" + tmp[j] + str(i) + "_target")
+            saver.save_np_scaled_img(outputs_cpu[i], "./pics/" + tmp[j] + str(i) + "_next")
 
         # denormalized error 
+        outputs_tmp = np.array([outputs_cpu])
+        outputs_tmp = torch.from_numpy(outputs_tmp)
+        targets_tmp = np.array([targets_cpu])
+        targets_tmp = torch.from_numpy(targets_tmp)
+        
+        outputs_dn.data.resize_as_(outputs_tmp).copy_(outputs_tmp)
+        targets_dn.data.resize_as_(targets_tmp).copy_(targets_tmp)
+
+        lossL1_dn = criterionL1(outputs_dn, targets_dn)
+        L1val_dn_accum += lossL1_dn.item()
         progress(i+1, len(testLoader))
-end_oa = time.time()
-print(end_oa-start_oa)
-
-
-tmp = ("pressure", "vel_x", "vel_y", "smoke")
-errors = [[],[],[],[],[]]
-print("\nГотово!")
-
-print("Запускаю тестирование аппроксимации...")
-
-approx_max_time = 0
-for j in range(5):
-    start_ = time.time()
-
-    for i in range(4):       
-        to_count = saver.read_np_f("./noised_files/" + tmp[i] + str(j) + "_noised")
-        adapter.count_p(to_count)
-        progress(j*4 + i+1, 20)
-
-    end_ = time.time()
-
-    if approx_max_time < (end_ - start_):
-            approx_max_time = end_ - start_
-
-
-print("\nГотово!")
-
-            
-print("Максимальное время прогнозирования составило %.1f секунд(ы)" %(pred_max_time))
-print("Максимальное время аппроксимации составило %.1f секунд(ы)" %(approx_max_time))
