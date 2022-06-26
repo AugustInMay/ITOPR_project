@@ -111,7 +111,7 @@ for j in range(5):
     start_ = time.time()
 
     for i in range(4):       
-        to_count = saver.read_np_f("./test_files/noised_files/" + tmp[i] + str(j) + "_noised")
+        to_count = saver.read_np_f("./noised_files/" + tmp[i] + str(j) + "_noised")
         adapter.count_p(to_count)
         progress(j*4 + i+1, 20)
 
