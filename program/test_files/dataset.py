@@ -64,62 +64,26 @@ def LoaderNormalizer(data, isTest = False, shuffle = 0, ratio = 0.8):
     data.targets = np.empty((500, 4, 100, 100))
     count = 0
 
-    first_range = random.sample(range(1,6), k=5)
-    second_range = random.sample(range(100), k=100)
-
-    for i in first_range:
-        second_range = random.sample(range(100), k=100)
-        for j in second_range:
-            sm = np.load(data.dataDir + "smoke" + str(i) + "_" + str(j) + ".npy")
-            vel_x = np.load(data.dataDir + "vel_x" + str(i)+ "_" + str(j) + ".npy")
-            vel_y = np.load(data.dataDir + "vel_y" + str(i)+ "_" + str(j) + ".npy")
-            pres = np.load(data.dataDir + "pressure" + str(i)+ "_" + str(j) + ".npy")
-            data.inputs[count] = np.array([sm, vel_x, vel_y, pres])
-            
-            if data.dataDir == "../data_3_1/":
-                sm = np.load(data.dataDir + "smoke_target" + str(i)+ "_" + str(j) + ".npy")
-                vel_x = np.load(data.dataDir + "vel_x_target" + str(i)+ "_" + str(j) + ".npy")
-                vel_y = np.load(data.dataDir + "vel_y_target" + str(i)+ "_" + str(j) + ".npy")
-                pres = np.load(data.dataDir + "pressure_target" + str(i)+ "_" + str(j) + ".npy")
-            else:
-                sm = np.load(data.dataDir + "smoke" + str(i)+ "_" + str(j) + "_target.npy")
-                vel_x = np.load(data.dataDir + "vel_x" + str(i)+ "_" + str(j) + "_target.npy")
-                vel_y = np.load(data.dataDir + "vel_y" + str(i)+ "_" + str(j) + "_target.npy")
-                pres = np.load(data.dataDir + "pressure" + str(i)+ "_" + str(j) + "_target.npy")
-
-            data.targets[count] = np.array([sm, vel_x, vel_y, pres])
-
-            count += 1
-
             
     ###################################### NORMALIZATION  OF TEST DATA #############################################
 
-    if isTest:
-        data.inputs  = np.empty((100, 4, 100, 100))
-        data.targets = np.empty((100, 4, 100, 100))
+    count = 0
 
-        count = 0
+    for i in range(1,6):
+        for j in range(100):
+            sm = np.load(data.dataDirTest + "smoke" + str(i) + "_" + str(j) + ".npy")
+            vel_x = np.load(data.dataDirTest + "vel_x" + str(i)+ "_" + str(j) + ".npy")
+            vel_y = np.load(data.dataDirTest + "vel_y" + str(i)+ "_" + str(j) + ".npy")
+            pres = np.load(data.dataDirTest + "pressure" + str(i)+ "_" + str(j) + ".npy")
+            data.inputs[count] = np.array([sm, vel_x, vel_y, pres])
 
-        for i in range(5,6):
-            for j in range(100):
-                sm = np.load(data.dataDirTest + "smoke" + str(i) + "_" + str(j) + ".npy")
-                vel_x = np.load(data.dataDirTest + "vel_x" + str(i)+ "_" + str(j) + ".npy")
-                vel_y = np.load(data.dataDirTest + "vel_y" + str(i)+ "_" + str(j) + ".npy")
-                pres = np.load(data.dataDirTest + "pressure" + str(i)+ "_" + str(j) + ".npy")
-                data.inputs[count] = np.array([sm, vel_x, vel_y, pres])
+            sm = np.load(data.dataDirTest + "smoke" + str(i)+ "_" + str(j) + "_target.npy")
+            vel_x = np.load(data.dataDirTest + "vel_x" + str(i)+ "_" + str(j) + "_target.npy")
+            vel_y = np.load(data.dataDirTest + "vel_y" + str(i)+ "_" + str(j) + "_target.npy")
+            pres = np.load(data.dataDirTest + "pressure" + str(i)+ "_" + str(j) + "_target.npy")
+            data.targets[count] = np.array([sm, vel_x, vel_y, pres])
 
-                sm = np.load(data.dataDirTest + "smoke" + str(i)+ "_" + str(j) + "_target.npy")
-                vel_x = np.load(data.dataDirTest + "vel_x" + str(i)+ "_" + str(j) + "_target.npy")
-                vel_y = np.load(data.dataDirTest + "vel_y" + str(i)+ "_" + str(j) + "_target.npy")
-                pres = np.load(data.dataDirTest + "pressure" + str(i)+ "_" + str(j) + "_target.npy")
-                data.targets[count] = np.array([sm, vel_x, vel_y, pres])
-
-                count += 1
-
-    print("Number of data loaded:", count)
-    print("Data stats, input  mean %f, max  %f;   targets mean %f , max %f " % ( 
-      np.mean(np.abs(data.targets), keepdims=False), np.max(np.abs(data.targets), keepdims=False) , 
-      np.mean(np.abs(data.inputs), keepdims=False) , np.max(np.abs(data.inputs), keepdims=False) ) ) 
+            count += 1
 
     return data
 
@@ -160,20 +124,9 @@ class TurbDataset(Dataset):
         
         self.totalLength = 500
 
-        if mode == self.TEST:
-            self.totalLength = int(500 * (1 - ratio))
-
-        if not self.mode==self.TEST:
-            # split for train/validation sets (80/20) , max 400
-            targetLength = int(500 * (1 - ratio))
-
-            self.valiInputs = self.inputs[targetLength:]
-            self.valiTargets = self.targets[targetLength:]
-            self.valiLength = self.totalLength - targetLength
-
-            self.inputs = self.inputs[:targetLength]
-            self.targets = self.targets[:targetLength]
-            self.totalLength = self.inputs.shape[0]
+        self.valiInputs = self.inputs
+        self.valiTargets = self.targets
+        self.valiLength =500
 
     def __len__(self):
         return self.totalLength

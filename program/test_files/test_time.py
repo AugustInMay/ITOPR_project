@@ -57,7 +57,6 @@ models = []
 print("Запускаю тестирование прогнозирования...")
 pred_max_time = 0
 
-start_oa = time.time()
 for si in range(25):
     s = chr(96+si)
     if(si==0): 
@@ -99,8 +98,6 @@ for si in range(25):
 
         # denormalized error 
         progress(i+1, len(testLoader))
-end_oa = time.time()
-print(end_oa-start_oa)
 
 
 tmp = ("pressure", "vel_x", "vel_y", "smoke")
